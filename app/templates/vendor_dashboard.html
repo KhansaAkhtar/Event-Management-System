@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Vendor Dashboard{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">Vendor Dashboard</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Add Service to an Event</h5>
+        <div id="createErrorBox" class="alert alert-danger d-none"></div>
+        <form id="createVendorForm" class="row g-2">
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="serviceType" placeholder="Service Type (e.g. Catering)" required>
+            </div>
+            <div class="col-md-3">
+                <input type="number" class="form-control" id="eventId" placeholder="Event ID" required>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-success w-100">Add Service</button>
+            </div>
+        </form>
+        <small class="text-muted">Tip: check the Events page for event IDs, or ask admin.</small>
+    </div>
+</div>
+
+<h5 class="mb-3">My Services</h5>
+<div id="myVendorContainer"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vendor.js') }}"></script>
+{% endblock %}

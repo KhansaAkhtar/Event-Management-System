@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">My Bookings</h3>
+<div id="bookingsContainer"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/bookings.js') }}"></script>
+{% endblock %}

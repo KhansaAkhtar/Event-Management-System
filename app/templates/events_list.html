@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">Upcoming Events</h3>
+<div id="eventsContainer" class="row g-3"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/events.js') }}"></script>
+{% endblock %}
