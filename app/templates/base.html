@@ -5,18 +5,17 @@
     <title>{% block title %}Event Manager{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-        <a class="navbar-brand" href="/">Event Manager</a>
+        <a class="navbar-brand" href="/"><i class="bi bi-calendar-event"></i> Event Hub</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/home">Events</a></li>
-                <li class="nav-item" id="adminNavLink"><a class="nav-link" href="/admin-dashboard">Admin</a></li>
-                <li class="nav-item" id="vendorNavLink"><a class="nav-link" href="/vendor-dashboard">Vendor</a></li>
-                <li class="nav-item" id="bookingsNavLink"><a class="nav-link" href="/my-bookings">My Bookings</a></li>
-                <li class="nav-item"><a 
-                <li class="nav-item"><a class="nav-link" href="/vendor-dashboard">Vendor</a></li>
+                <li class="nav-item"><a class="nav-link" href="/home"><i class="bi bi-calendar3"></i> Events</a></li>
+                <li class="nav-item" id="bookingsNavLink"><a class="nav-link" href="/my-bookings"><i class="bi bi-bookmark-check"></i> My Bookings</a></li>
+                <li class="nav-item" id="adminNavLink"><a class="nav-link" href="/admin-dashboard"><i class="bi bi-speedometer2"></i> Admin</a></li>
+                <li class="nav-item" id="vendorNavLink"><a class="nav-link" href="/vendor-dashboard"><i class="bi bi-shop"></i> Vendor</a></li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
@@ -59,4 +58,3 @@
     {% block scripts %}{% endblock %}
 </body>
 </html>
-    

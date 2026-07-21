@@ -95,7 +95,6 @@ setTimeout(() => window.location.href = '/', 2000);
                             <button class="btn btn-sm btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown">Reports</button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item reportBtn" href="#" data-id="${ev.id}" data-type="revenue">Revenue (PDF)</a></li>
-                                <li><a class="dropdown-item reportBtn" href="#" data-id="${ev.id}" data-type="attendance">Attendance (PDF)</a></li>
                                 <li><a class="dropdown-item reportBtn" href="#" data-id="${ev.id}" data-type="vendors">Vendors (Excel)</a></li>
                                 <li><a class="dropdown-item reportBtn" href="#" data-id="${ev.id}" data-type="payments">Payments (PDF)</a></li>
                             </ul>

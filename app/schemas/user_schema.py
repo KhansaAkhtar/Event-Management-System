@@ -5,7 +5,7 @@ class UserRegisterSchema(Schema):
     email = fields.Email(required=True)
     contact = fields.Str(required=True, validate=validate.Regexp(r'^\d{10,15}$', error="Contact must be 10-15 digits"))
     password = fields.Str(required=True, validate=validate.Length(min=6))
-    role = fields.Str(required=True, validate=validate.OneOf(['admin', 'vendor', 'user']))
+    role = fields.Str(required=True, validate=validate.OneOf(['vendor', 'user']))
 
 class UserLoginSchema(Schema):
     email = fields.Email(required=True)

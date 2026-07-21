@@ -3,7 +3,43 @@ document.addEventListener('DOMContentLoaded', function () {
     if (eventsContainer) {
         loadEvents();
     }
+    const requestForm = document.getElementById('requestEventForm');
+    if (requestForm) {
+        requestForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const errorBox = document.getElementById('requestErrorBox');
+            const token = localStorage.getItem('token');
+            const payload = {
+                name: document.getElementById('reqName').value,
+                date: document.getElementById('reqDate').value,
+                venue: document.getElementById('reqVenue').value,
+                capacity: parseInt(document.getElementById('reqCapacity').value),
+                description: document.getElementById('reqDescription').value
+            };
 
+            try {
+                const response = await fetch('/events/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    errorBox.textContent = JSON.stringify(data.errors || data.error);
+                    errorBox.classList.remove('d-none');
+                    return;
+                }
+
+                errorBox.classList.add('d-none');
+                alert('Request submitted! Admin will review and set a price.');
+                requestForm.reset();
+            } catch (err) {
+                errorBox.textContent = 'Something went wrong.';
+                errorBox.classList.remove('d-none');
+            }
+        });
+    }
     async function loadEvents() {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -40,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   <p class="card-text mb-1"><strong>Capacity:</strong> ${ev.capacity}</p>
                   <span class="badge bg-info text-dark mb-2">${ev.status}</span>
                   <p class="card-text">${ev.description || ''}</p>
-                  <button class="btn btn-primary btn-sm bookBtn" data-event-id="${ev.id}">Book Event</button>
+                  <button class="btn btn-primary btn-sm bookBtn" data-event-id="${ev.id}"><i class="bi bi-ticket-perforated"></i> Book Event</button>
                   </div>
                   </div>
     `             ;

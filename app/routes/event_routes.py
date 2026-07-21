@@ -3,15 +3,29 @@ from marshmallow import ValidationError
 from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 from app import db
 from app.models.event import Event
-from app.schemas.event_schema import EventSchema
+from app.models.booking import Booking
+from app.schemas.event_schema import EventSchema, EventRequestSchema, EventApprovalSchema
 from app.utils.decorators import role_required
+from datetime import datetime
 
 event_bp = Blueprint('events', __name__)
+
+def update_expired_events():
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    events = Event.query.filter(Event.date < today, Event.status == 'upcoming').all()
+    for e in events:
+        e.status = 'completed'
+    if events:
+        db.session.commit()
 
 @event_bp.route('', methods=['GET'])
 @jwt_required()
 def get_events():
-    events = Event.query.all()
+    update_expired_events()
+    events = Event.query.filter(
+        Event.status.in_(['upcoming', 'completed']),
+        Event.is_private == False
+    ).all()
     result = [{
         "id": e.id, "name": e.name, "date": e.date, "venue": e.venue,
         "capacity": e.capacity, "price": e.price, "description": e.description,
@@ -49,6 +63,45 @@ def create_event():
     db.session.commit()
     return jsonify({"message": "Event created successfully", "id": new_event.id}), 201
 
+@event_bp.route('/request', methods=['POST'])
+@role_required('user')
+def request_event():
+    try:
+        data = EventRequestSchema().load(request.get_json())
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    current_user_id = get_jwt_identity()
+    new_event = Event(
+        name=data['name'], date=data['date'], venue=data['venue'],
+        capacity=data['capacity'], description=data.get('description'),
+        status='pending', requested_by=current_user_id, price=None,
+        is_private=True
+    )
+    db.session.add(new_event)
+    db.session.commit()
+    return jsonify({"message": "Event request submitted for approval", "id": new_event.id}), 201
+@event_bp.route('/<int:event_id>/approve', methods=['PUT'])
+@role_required('admin', 'super_admin')
+def approve_event(event_id):
+    e = Event.query.get_or_404(event_id)
+    try:
+        data = EventApprovalSchema().load(request.get_json())
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    current_user_id = get_jwt_identity()
+    e.price = data['price']
+    e.status = 'upcoming'
+    e.admin_id = current_user_id
+    db.session.commit()
+
+    # Automatically book this private event for the requesting user
+    new_booking = Booking(user_id=e.requested_by, event_id=e.id, status='registered')
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return jsonify({"message": "Event approved, priced, and booked for the requester"}), 200
 
 @event_bp.route('/<int:event_id>', methods=['PUT'])
 @role_required('admin', 'super_admin')
