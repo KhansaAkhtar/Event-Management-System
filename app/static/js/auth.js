@@ -24,6 +24,7 @@ function () {
                 });
                 const data = await response.json();
 
+                
                 if (!response.ok) {
                     errorBox.textContent = data.error || 'Login failed';
                     errorBox.classList.remove('d-none');
@@ -37,6 +38,7 @@ function () {
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('name', data.name);
                 localStorage.setItem('userId', data.id);
+                localStorage.setItem('loginTime', Date.now());
 
                 // Role-based redirect
                 if (data.role === 'admin' || data.role === 'super_admin') {
@@ -78,7 +80,7 @@ function () {
                     return;
                 }
 
-                alert('Registered successfully! Please login.');
+                showToast('Registered successfully! Please login.', 'success');
                 window.location.href = '/login';
             } catch (err) {
                 errorBox.textContent = 'Something went wrong. Try again.';

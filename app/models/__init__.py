@@ -3,3 +3,7 @@ from app.models.event import Event
 from app.models.booking import Booking
 from app.models.vendor import Vendor
 from app.models.payment import Payment
+from app.models.waitlist import Waitlist
+from app.models.booking_log import BookingAttemptLog
+from app.models.reminder_log import ReminderLog
+from app.models.audit_log import AuditLog

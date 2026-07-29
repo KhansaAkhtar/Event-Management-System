@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const role = localStorage.getItem('role');
 
     if (role !== 'vendor') {
-        alert('Access denied: Vendors only');
+        showToast('Access denied: Vendors only');
         window.location.href = '/';
         return;
     }

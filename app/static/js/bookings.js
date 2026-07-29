@@ -28,18 +28,39 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            let html = `<table class="table table-bordered">
-                <thead><tr><th>Booking ID</th><th>Event</th><th>Price</th><th>Status</th><th>Date</th><th>Pay</th><th>Cancel</th></tr></thead><tbody>`;
+            let html = `<table class="table table-bordered align-middle">
+                <thead><tr><th>Booking ID</th><th>Event</th><th>Price</th><th>Booking Status</th><th>Payment Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>`;
 
             bookings.forEach(b => {
+                let paymentBadge;
+                if (b.status === 'cancelled') {
+                    paymentBadge = `<span class="badge bg-secondary">N/A</span>`;
+                } else if (b.payment_status === 'paid') {
+                    paymentBadge = `<span class="badge bg-success">Paid</span>`;
+                } else if (b.payment_status === 'pending') {
+                    paymentBadge = `<span class="badge bg-warning">Pending Verification</span>`;
+                } else {
+                    paymentBadge = `<span class="badge bg-secondary">Not Paid</span>`;
+                }
+
+                let actions = '';
+                if (b.status !== 'cancelled') {
+                    if (b.payment_status !== 'paid' && b.payment_status !== 'pending') {
+                        actions += `<button class="btn btn-sm btn-outline-primary payBtn me-1" data-booking-id="${b.id}" data-amount="${b.event_price}">Pay</button>`;
+                    }
+                    actions += `<button class="btn btn-sm btn-outline-danger cancelBtn" data-booking-id="${b.id}">Cancel</button>`;
+                } else {
+                    actions = '—';
+                }
+
                 html += `<tr>
                     <td>${b.id}</td>
                     <td>${b.event_name} (ID: ${b.event_id})</td>
                     <td>Rs. ${b.event_price}</td>
                     <td><span class="badge bg-${b.status === 'cancelled' ? 'danger' : 'success'}">${b.status}</span></td>
+                    <td>${paymentBadge}</td>
                     <td>${new Date(b.booking_date).toLocaleDateString()}</td>
-                    <td>${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-outline-primary payBtn" data-booking-id="${b.id}" data-amount="${b.event_price}">Pay</button>` : ''}</td>
-                    <td>${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-outline-danger cancelBtn" data-booking-id="${b.id}">Cancel</button>` : ''}</td>
+                    <td>${actions}</td>
                 </tr>`;
             });
             html += `</tbody></table>`;
@@ -71,10 +92,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         const data = await response.json();
         if (!response.ok) {
-            alert(data.error || 'Cancel failed');
+            showToast(data.error || 'Cancel Failed!', 'error')
             return;
         }
-        alert('Booking cancelled');
+        showToast('Booking cancelled', 'success');
         loadMyBookings();
     }
 
@@ -89,10 +110,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         const data = await response.json();
         if (!response.ok) {
-            alert(data.error || 'Payment failed');
+            showToast(data.error || 'Payment failed', 'error');
             return;
         }
-        alert('Payment submitted (pending approval)');
+        showToast('Payment submitted (pending approval)', 'success');
         loadMyBookings();
     }
 });

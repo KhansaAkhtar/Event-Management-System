@@ -1,10 +1,9 @@
 from app import db
 from datetime import datetime
 
-class Booking(db.Model):
+class BookingAttemptLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
-    status = db.Column(db.String(20), default='registered')  
-    booking_date = db.Column(db.DateTime, default=datetime.utcnow)
-    special_request = db.Column(db.String(500), nullable=True)
+    reason = db.Column(db.String(200))
+    attempted_at = db.Column(db.DateTime, default=datetime.utcnow)
