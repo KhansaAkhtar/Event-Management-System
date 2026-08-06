@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app import db
 from app.models.user import User
 from app.schemas.user_schema import UserRegisterSchema, UserLoginSchema
@@ -59,6 +59,36 @@ def register():
       429:
         description: Rate limit exceeded
     """
+    try:
+        data = UserRegisterSchema().load(request.get_json())
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    existing_user = User.query.filter_by(email=data['email']).first()
+    if existing_user:
+        return jsonify({"error": "Email already registered"}), 409
+
+    hashed_pw = generate_password_hash(data['password'])
+
+    new_user = User(
+        name=data['name'],
+        email=data['email'],
+        contact=data.get('contact'),
+        password_hash=hashed_pw,
+        role=data['role']
+    )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    send_email(
+        subject="Welcome to Event Hub!",
+        recipients=[new_user.email],
+        body=f"Hi {new_user.name},\n\nYour account has been created successfully with the role '{new_user.role}'.\n\nWelcome aboard!"
+    )
+
+    return jsonify({"message": "User registered successfully"}), 201
+
 
 @auth_bp.route('/login', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -106,7 +136,6 @@ def login():
     if not user:
         return jsonify({"error": "Invalid email or password"}), 401
 
-    # Check if account is currently locked
     if user.locked_until and user.locked_until > datetime.utcnow():
         remaining = int((user.locked_until - datetime.utcnow()).total_seconds() / 60) + 1
         return jsonify({"error": f"Account locked. Try again in {remaining} minute(s)."}), 403
@@ -123,7 +152,6 @@ def login():
         db.session.commit()
         return jsonify({"error": "Invalid email or password"}), 401
 
-    # Successful login — reset counters
     user.failed_login_attempts = 0
     user.locked_until = None
     db.session.commit()
@@ -140,10 +168,11 @@ def login():
         "id": user.id
     }), 200
 
-    @auth_bp.route('/logout', methods=['POST'])
-    @jwt_required()
-    def logout():
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        log_action(current_user_id, "logout", f"User {user.email if user else current_user_id} logged out")
-        return jsonify({"message": "Logged out successfully"}), 200
+
+@auth_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    log_action(current_user_id, "logout", f"User {user.email if user else current_user_id} logged out")
+    return jsonify({"message": "Logged out successfully"}), 200
